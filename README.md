@@ -12,6 +12,8 @@ Primarily for used for Lab Reports in my first year of uni.
 * All explanatory information is within the .Rmd file; please refer to notes in that file for more clarification. 
 * All IRL Examples but the last one can be seen 'in context' by viewing the data analysis and visualisation code from [Lab Report 5](Lab_5_Analysis_and_Viz.Rmd)
 
+Final Example of Violin Plot (from Lab 5)![](images/ViolinPlot.png)
+
 
 # How, Why and When:
 
