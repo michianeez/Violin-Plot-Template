@@ -138,7 +138,7 @@ ggplot(pinfo, aes(x = age, y = Response, colour = as.factor(Condition))) +
 # Dependent variable is interval or ratio level? YES
 #Two samples are independent (therefore between groups design)? YES
 #(equal variances?) TECHNICALLY IDK, BUT WELCH'S IS STANDARD AND I DON'T REALLY CARE TO DO LEVENE'S RN
-# Dependent variable is normally distributed? WE'LL SEE! look below bitches
+# Dependent variable is normally distributed? WE'LL SEE! look below :)
 
 library(car)
 
