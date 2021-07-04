@@ -1,5 +1,5 @@
 # Violin-Plot-Template
-Primarily for used for Lab Reports in my first year of uni.  
+Primarily for used for Lab Reports in my first year of uni.
 
 --- 
 
