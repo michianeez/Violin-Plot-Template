@@ -90,8 +90,9 @@ ggplot(pinfo, #identify the df you want to use
 ### Note: the real life example used below is not from "Lab 5"  
 
 
-## To differentiate the different levels within the experimental conditions/groups, then you will need to use facet_wrap()
-    #IRL Example (from Lab 4), including the creating of the additional df's to supplement the data viz:
+## To differentiate the different levels within the experimental conditions/groups, then you will need to use facet_wrap() function.
+
+#IRL Example (from Lab 4), including the creating of the additional df's to supplement the data viz:
 ```{r}
 means <- dflong %>% 
   group_by(group, test) %>%
