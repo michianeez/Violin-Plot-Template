@@ -1,0 +1,173 @@
+---
+title: "Lab5 Data Clean Code"
+author: "Michi Aneez"
+date: "14/03/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+##Demographics
+```{r}
+v4demo <- read.csv("v4_demographics.csv") %>%
+  select(Participant.Private.ID, Experiment.Version,Question.Key, Response) %>%
+  filter(Question.Key == "Sex" | Question.Key == "age")
+
+v5demo <- read.csv("v5_demographics.csv") %>%
+  select(Participant.Private.ID, Experiment.Version,Question.Key, Response) %>%
+  filter(Question.Key == "Sex" | Question.Key == "age")
+
+demo <- full_join(v4demo, v5demo, by = c("Participant.Private.ID", "Experiment.Version", "Question.Key", "Response")) %>% spread(Question.Key, Response) %>% mutate(age = as.numeric(age)) %>% na.omit()
+
+rm(v5demo, v4demo) #cleans all unused objects
+```
+
+##DV data
+```{r}
+v4anchorlow <- read.csv("v4_anchorlow.csv") %>% 
+  select(Participant.Private.ID, randomiser.rknp, Zone.Type, Response) %>%
+  filter(Zone.Type == "response_slider_endValue") %>%
+  select(Participant.Private.ID, randomiser.rknp, Response)
+
+v4anchorhigh <- read.csv("v4_anchorhigh.csv") %>% 
+  select(Participant.Private.ID, randomiser.rknp, Zone.Type, Response) %>%
+  filter(Zone.Type == "response_slider_endValue") %>%
+  select(Participant.Private.ID, randomiser.rknp, Response)
+
+v5anchorlow <- read.csv("v5_anchorlow.csv") %>% 
+  select(Participant.Private.ID, randomiser.rknp, Zone.Type, Response) %>%
+  filter(Zone.Type == "response_slider_endValue") %>%
+  select(Participant.Private.ID, randomiser.rknp, Response)
+
+v5anchorhigh <- read.csv("v5_anchorhigh.csv") %>% 
+  select(Participant.Private.ID, randomiser.rknp, Zone.Type, Response) %>%
+  filter(Zone.Type == "response_slider_endValue") %>%
+  select(Participant.Private.ID, randomiser.rknp, Response)
+
+anchorlow <- rbind(v4anchorlow, v5anchorlow) %>% mutate(Response = as.numeric(Response))
+anchorhigh <- rbind(v4anchorhigh, v5anchorhigh) %>% mutate(Response = as.numeric(Response))
+allanchor <- rbind(anchorlow, anchorhigh)
+
+rm(v4anchorhigh, v4anchorlow, v5anchorhigh, v5anchorlow) 
+#clears all remaining unused objects
+```
+
+##Full and cleaned df with all ppt information
+```{r}
+pinfo <- inner_join(allanchor, demo, by = "Participant.Private.ID") %>% 
+  select(Participant.Private.ID, age, Sex, randomiser.rknp, Response) %>%
+  mutate(age = as.numeric(age), Response = as.numeric(Response), randomiser.rknp = as.factor(randomiser.rknp)) %>%
+  na.omit()
+  
+```
+
+##Calculation of all demographic and descriptives
+```{r}
+pinfo %>% group_by(Sex) %>% summarise(n())
+
+demo %>% summarise(mean = mean(age, na.rm = TRUE),
+                               sd = sd(age, na.rm = TRUE)) %>% round(2)
+
+desc <- pinfo %>%
+  group_by(randomiser.rknp) %>%
+  summarise(mean = mean(Response),
+            sd = sd(Response))
+```
+
+##Descriptive Graphs (Violin Plot + Age/Donation Correlation)
+```{r}
+#prepping the df labels
+pinfo <- pinfo %>%
+  mutate(randomiser.rknp = dplyr::recode(randomiser.rknp, "pitch_low" = "Low Anchor","pitch_high" = "High Anchor")) %>% rename(Condition = randomiser.rknp)
+
+#mean point df
+desc.vis <- pinfo %>% group_by(Condition) %>% 
+  summarise(Response = mean(Response))
+
+#error bar calc df
+errbar_lims <- pinfo %>% group_by(Condition) %>% 
+  summarise(mean = mean(Response), sd = sd(Response), 
+        upper = mean+sd, lower = mean-sd)
+
+#violin plot
+ggplot(pinfo, aes(x = Condition, y = Response, colour = Condition)) +
+  geom_jitter(alpha = .3, width = .09) +
+  geom_violin(alpha = .2, width = .3) +
+  geom_point(data = desc.vis, size = 2, width = .3) +
+  geom_errorbar(aes(x = Condition, ymin = lower, ymax = upper, colour = Condition), errbar_lims, inherit.aes = FALSE, width = 0.04) +
+   labs(y = "Amount of Money Donated out of £100", title = "Hypothetical Participant Donations across the High and Low Anchor Conditions") +
+  guides(color = "none", fill = "none") + #this removed the ugly key to the side indicating the groups
+  theme_minimal()
+
+############## 
+
+#indiv scatter for each condition w coloured sex
+ggplot(pinfo, aes(x = age, y = Response, colour = as.factor(Sex))) +
+  geom_point() +
+  facet_wrap(~Condition) +
+  geom_smooth(method = "lm", se = FALSE, colour = "grey50", size = 0.5) +
+  labs(x = "Age", y = "Amount of Money Donated out of £100", title = "Correlation between Age and Hypothetical Donation Across Both Conditions", colour = "Sex") +
+  theme_light()
+
+#indiv scatter for each condition
+ggplot(pinfo, aes(x = age, y = Response, colour = as.factor(Condition))) +
+  geom_point() +
+  facet_wrap(~Condition) +
+  guides(color = "none", fill = "none") +
+  geom_smooth(method = "lm", se = FALSE, colour = "grey50", size = 0.5) +
+  labs(x = "Age", y = "Amount of Money Donated out of £100", title = "Correlation between Age and Hypothetical Donation Across Both Conditions") +
+  theme_light()
+
+#no facet wrap/across both conditions
+ggplot(pinfo, aes(x = age, y = Response, colour = as.factor(Condition))) +
+  geom_point() +
+  guides(color = "none", fill = "none") +
+  geom_smooth(method = "lm", se = FALSE, colour = "grey50", size = 0.5) +
+  labs(x = "Age", y = "Amount of Money Donated out of £100", title = "Correlation between Age and Hypothetical Donation Across Both Conditions") +
+  theme_light()
+```
+
+##inferential analysis
+```{r}
+# Dependent variable is interval or ratio level? YES
+#Two samples are independent (therefore between groups design)? YES
+#(equal variances?) TECHNICALLY IDK, BUT WELCH'S IS STANDARD AND I DON'T REALLY CARE TO DO LEVENE'S RN
+# Dependent variable is normally distributed? WE'LL SEE! look below bitches
+
+library(car)
+
+qqPlot(anchorhigh %>% pull(Response))
+qqPlot(anchorlow %>% pull(Response))
+#aaplot graphs show that normality can (mostly) be assumed!
+
+
+#### t test 
+library(broom)
+  
+results <- t.test(pinfo %>% filter(Condition =="Low Anchor") %>% pull(Response),
+       pinfo %>% filter(Condition =="High Anchor") %>% pull(Response)) %>%
+  tidy()
+#cleaned in object
+
+t.test(pinfo %>% filter(Condition =="Low Anchor") %>% pull(Response),
+       pinfo %>% filter(Condition =="High Anchor") %>% pull(Response))
+#in-line
+
+#### cohen's d calc
+library(lsr)
+
+cohensD(x = pinfo %>% filter(Condition =="Low Anchor") %>% pull(Response), y = pinfo %>% filter(Condition =="High Anchor") %>% pull(Response), method = "unequal")
+
+######### pearson's correlation coefficient (with high anchor)
+cor.test(pinfo %>% filter(Condition =="High Anchor") %>% pull(age), pinfo %>% filter(Condition =="High Anchor") %>% pull(Response), method = "pearson")
+
+rm(allanchor, anchorhigh, anchorlow) 
+### clears all remaining unused objects
+```
+
