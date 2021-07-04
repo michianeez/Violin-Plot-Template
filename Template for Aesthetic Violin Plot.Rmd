@@ -9,53 +9,53 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+### R Markdown
 
 ## This template is only applicable after all data cleaning and processing has taken place. 
 ## For a full example of how the lead up to the data visualisation looks like, refer to 'Lab 5 Data Analysis'. 
 
+## First create a "master" df with all cleaned data in correct columns
+    #this df should be labelled pinfo (participant inf)
+## Then rename variables/columns (and groups/conditions)
+    #this will sort the labelling of the data visualisation
+    #ie., if there are multiple conditions, then renaming them here will remove the need to use labs() at the very last stage of the process
+      #but it does make it annoying to type because the full names will require "" around them. just remember to spell it all correctly!
+#IRL Example:
 ```{r}
-#first create a "master" df with all cleaned data in correct columns
-  #this df should be labelled pinfo (participant inf)
-#then rename variables/columns (and groups/conditions)
-  #this will sort the labelling of the data visualisation
-  #ie., if there are multiple conditions, then renaming them here will remove the need to use labs() at the very last stage of the process
-  #but it does make it annoying to type because the full names will require "" around them. just remember to spell it all correctly!
-
-#IRL Example: 
 pinfo <- pinfo %>%
   mutate(randomiser.rknp = dplyr::recode(randomiser.rknp, "pitch_low" = "Low Anchor","pitch_high" = "High Anchor")) %>%
   rename(Condition = randomiser.rknp)
+```
 
-
-
-#to visualise the mean/median point on the graph, create a new df
-  #make sure to have the same variable names in the left most column
+## To visualise the mean/median point on the graph, create a new df
+    #make sure to have the same variable names in the left most column
 #IRL Example:
+```{r}
 desc.vis <- pinfo %>%
   group_by(Condition) %>% 
   summarise(Response = mean(Response))
+ ```
 #note that since this data is taken from the original pinfo df, it will automatically have the correct names for the responding columns
 #to calculate the median (instead of the mean, like the above example), change the function to median()
 
 
 
-#to visualise errorbars (i.e. to display the standard deviation/ standard error), create a new df
+## To visualise errorbars (i.e. to display the standard deviation/ standard error), create a new df
   #again, be careful to have the same variable/column names as the df with the mean/median values
-
 #IRL Example:
+```{r}
 errbar_lims <- pinfo %>%
   group_by(Condition) %>% 
   summarise(mean = mean(Response), sd = sd(Response), upper = mean+sd, lower = mean-sd)
+ ```
 #note that since this data is taken from the original pinfo df, it will automatically have the correct names for the responding columns
 #to calculate the se (instead of the sd, like the above example), calculate the se by dividing the sd by the square root of the sample. 
   #note that the calculation of the upper and lower limits will remain the same (just with se instead of sd); only the calculation of the se value itself [se = sd(dv)/sqrt(nsample)] will be more complicated. 
 
 
-
-#to visualise the aesthetic and informative violin plot, use the following code, but replace the relevant variable/column names/
-
+## To visualise the aesthetic and informative violin plot, use the following code, but replace the variable/column names to ones that a relevant to your current df.
 #IRL Example:
+```{r}
 ggplot(pinfo, #identify the df you want to use
        aes(x = Condition, #clarify what goes in the x axis
            y = Response, #clarify what goes in the y axis
@@ -75,9 +75,9 @@ ggplot(pinfo, #identify the df you want to use
         title = "Hypothetical Participant Donations across the High and Low Anchor Conditions") + #gives graph a title
   guides(color = "none", fill = "none") + #this removes the ugly legend/key to the side indicating the groups
   theme_minimal() #gives the beautiful clean minimal theme babyyyyy
-
-#bam, then you're done, you've got one sexy graph. 
 ```
+
+#congrats, you've now got one ✨ aesthetic ✨ graph. 
 
 ## Take care to keep ALL the column names the same when making new df's, otherwise the geom_point() and geom_errorbar() layers will not be added to the parent ggplot! This is because the values on the new df's need to be plotted on the axis of the parent df and hence need to be recognised by the parent df and ggplot. 
 
@@ -86,14 +86,12 @@ ggplot(pinfo, #identify the df you want to use
 ## So a graph displaying only two conditions is good enough...
 ## But what if there are  multiple levels to the independent variable and there are multiple conditions too?
 ## Do not fear, since you can still make a sexy graph!
+### Note: the real life example used below is not from "Lab 5"  
 
-## Note: the real life example used for this graph type is not from "Lab 5 Clean Code"  
 
-```{r}
-#to differentiate the different levels within the experimental conditions/groups, then you will need to use facet_wrap()
-
+## To differentiate the different levels within the experimental conditions/groups, then you will need to use facet_wrap()
 #IRL Example (from Lab 4), including the creating of the additional df's to supplement the data viz:
-
+```{r}
 means <- dflong %>% 
   group_by(group, test) %>%
   summarise(score = mean(score))
@@ -117,7 +115,5 @@ ggplot(dflong, aes(group, score, color = group)) + #no need to actually put "x =
   labs(x = "Test", y = "Mean Recall") +
   guides(color = "none", fill = "none") + 
   theme_bw() # theme_bw() works better with facet_wrap() than with theme_minimal(). but that may just be with this dataset so play around with themes anyway to find one that works best your current data viz!
-
-#voila, you're done, you've got sexy graph version 2.0 
 ```
-
+#voila, you're done! ✨ aesthetic ✨ graph version 2.0 is ready to roll.
