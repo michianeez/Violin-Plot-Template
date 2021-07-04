@@ -20,7 +20,7 @@ knitr::opts_chunk$set(echo = TRUE)
     #this will sort the labelling of the data visualisation
     #ie., if there are multiple conditions, then renaming them here will remove the need to use labs() at the very last stage of the process
       #but it does make it annoying to type because the full names will require "" around them. just remember to spell it all correctly!
-#IRL Example:
+    #IRL Example:
 ```{r}
 pinfo <- pinfo %>%
   mutate(randomiser.rknp = dplyr::recode(randomiser.rknp, "pitch_low" = "Low Anchor","pitch_high" = "High Anchor")) %>%
@@ -29,7 +29,7 @@ pinfo <- pinfo %>%
 
 ## To visualise the mean/median point on the graph, create a new df
     #make sure to have the same variable names in the left most column
-#IRL Example:
+    #IRL Example:
 ```{r}
 desc.vis <- pinfo %>%
   group_by(Condition) %>% 
@@ -42,7 +42,7 @@ desc.vis <- pinfo %>%
 
 ## To visualise errorbars (i.e. to display the standard deviation/ standard error), create a new df
   #again, be careful to have the same variable/column names as the df with the mean/median values
-#IRL Example:
+  #IRL Example:
 ```{r}
 errbar_lims <- pinfo %>%
   group_by(Condition) %>% 
@@ -54,7 +54,7 @@ errbar_lims <- pinfo %>%
 
 
 ## To visualise the aesthetic and informative violin plot, use the following code, but replace the variable/column names to ones that a relevant to your current df.
-#IRL Example:
+   #IRL Example:
 ```{r}
 ggplot(pinfo, #identify the df you want to use
        aes(x = Condition, #clarify what goes in the x axis
@@ -79,7 +79,8 @@ ggplot(pinfo, #identify the df you want to use
 
 #congrats, you've now got one ✨ aesthetic ✨ graph. 
 
-## Take care to keep ALL the column names the same when making new df's, otherwise the geom_point() and geom_errorbar() layers will not be added to the parent ggplot! This is because the values on the new df's need to be plotted on the axis of the parent df and hence need to be recognised by the parent df and ggplot. 
+## Take care to keep ALL the column names the same when making new df's, otherwise the geom_point() and geom_errorbar() layers will not be added to the parent ggplot! 
+## This is because the values on the new df's need to be plotted on the axis of the parent df and hence need to be recognised by the parent df and ggplot. 
 
 ---
 
@@ -90,7 +91,7 @@ ggplot(pinfo, #identify the df you want to use
 
 
 ## To differentiate the different levels within the experimental conditions/groups, then you will need to use facet_wrap()
-#IRL Example (from Lab 4), including the creating of the additional df's to supplement the data viz:
+    #IRL Example (from Lab 4), including the creating of the additional df's to supplement the data viz:
 ```{r}
 means <- dflong %>% 
   group_by(group, test) %>%
